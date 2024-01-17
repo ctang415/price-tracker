@@ -1,22 +1,37 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Button from './button'
 
-const Product = ({setAllProducts, allProducts}) => {
-    
+const Product = ({product, setAllProducts, allProducts}) => {
+
+    const removeItem = async (id) => {
+       try {
+            const response = await fetch (`http://localhost:3000/products/${id}`, {
+                method: 'DELETE', credentials: 'include'
+            })
+            if (!response.ok) {
+                throw await response.json();
+            }
+            const data = await response.json();
+            if (response.status === 200) {
+                alert('Item successfully removed!')
+                setAllProducts(allProducts.filter(x=> x.id !== id))
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
     return (
-        <ul>
-        {allProducts.map((product) => {
-            return(
-                <li key={product.id}>
-                    <Link key={product.id} to={product.url}>
-                        <img className="max-h-60" src={product.image_url} alt="Product image"/>
-                    </Link>
-                    <h3>{product.name}</h3>
-                    <p>PRICE: ${product.price}</p>
-                    <p>Lowest Price: ${product.lowest_price} on {product.lowest_price_date}</p>
-                </li>
-            )
-        })}
-        </ul>
+        <li key={product.id} className='max-w-xs flex flex-col border-4 border-white p-2 items-center rounded-md bg-white gap-4'>
+            <Button product={product} removeItem={removeItem}/>
+            <Link key={product.id} to={product.url} className='self-center'>
+                <img className="max-h-60" src={product.image_url} alt="Product image"/>
+            </Link>
+            <h3 className='text-center font-bold'>{product.name} ABCABAC DSAD DASDAS DSAD dSADASD DDdda ASd</h3>
+            <p>Today's Price: <strong>${product.price}</strong></p>
+            <p className='text-xs'>Lowest Price: ${product.lowest_price} on {product.lowest_price_date.slice(0, 10)}</p>
+        </li>
     )
 }
 
