@@ -41,7 +41,7 @@ exports.table_get = asyncHandler( async (req, res, next) => {
 
     const getAllProducts = () => {
         let page = ((req.params.page - 1) * 6);
-        let sql = `SELECT * FROM myproducts LIMIT 6 OFFSET ${page}`
+        let sql = `SELECT * FROM myproducts ORDER BY id DESC LIMIT 6 OFFSET ${page}`
         return new Promise ((resolve, reject) => {
             db.query(sql, (err, result) => {
                 if (err) return reject(err)

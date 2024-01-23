@@ -16,6 +16,7 @@ const Product = ({product, setAllProducts, allProducts}) => {
             if (response.status === 200) {
                 alert('Item successfully removed!')
                 setAllProducts(allProducts.filter(x=> x.id !== id))
+                //localStorage.removeItem()
             }
         } catch (err) {
             console.log(err)
@@ -28,7 +29,7 @@ const Product = ({product, setAllProducts, allProducts}) => {
             <Link key={product.id} to={product.url} className='self-center'>
                 <img className="max-h-60" src={product.image_url} alt="Product image"/>
             </Link>
-            <h3 className='text-center font-bold'>{product.name} ABCABAC DSAD DASDAS DSAD dSADASD DDdda ASd</h3>
+            <h3 className='text-center font-bold'>{product.name}</h3>
             <p>Today's Price: <strong>${product.price}</strong></p>
             <p className='text-xs'>Lowest Price: ${product.lowest_price} on {product.lowest_price_date.slice(0, 10)}</p>
         </li>
