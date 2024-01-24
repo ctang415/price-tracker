@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-const Input = () => {
+const Input = ({retrieveProducts, page}) => {
     const [ link, setLink ] = useState('')
 
     const checkUrl = async (e) => {
@@ -32,7 +32,7 @@ const Input = () => {
             }
             const data = await response.json();
             if (response.status === 200) {
-                console.log(data);
+                retrieveProducts(page)
             }
         } catch (err) {
             console.log(err);

@@ -14,7 +14,7 @@ function App() {
 
   const retrieveProducts = async (pageNum) => {
     try {
-      const response = await fetch (`http://localhost:3000/${pageNum}`)
+      const response = await fetch (`http://localhost:3000/?page=${pageNum}`)
       if (!response.ok) {
         if (response.status === 404) {
           throw await response.json()
@@ -33,7 +33,7 @@ function App() {
 
   const sortBy = async (sort, page) => {
     try {
-      const response = await fetch (`http://localhost:3000/${sort}/${page}`, {
+      const response = await fetch (`http://localhost:3000/?search=${sort}&page=${page}`, {
       })
       if (!response.ok) {
         throw await response.json()
@@ -61,14 +61,14 @@ function App() {
   return (
     <div className='h-full w-screen bg-slate-100 flex flex-col items-center align-center p-10 gap-2'>
       <h1 className='text-6xl font-serif text-extrabold'>what's today's price?</h1>
-      <Input/>
+      <Input retrieveProducts={retrieveProducts} page={page}/>
       <select onChange={ (e) => { setSortText(e.target.value); setSort(true); sortBy(e.target.value, 1) } }>
         <option value=''>Please choose an option</option>
         <option value='price ASC'>Price: Low to High</option>
         <option value='price DESC'>Price: High to Low</option>
         <option value='id DESC'>Newest</option>
       </select>
-      <Products allProducts={allProducts} setAllProducts={setAllProducts}/>
+      <Products page={page} retrieveProducts={retrieveProducts} allProducts={allProducts} setAllProducts={setAllProducts}/>
       <div className='flex flex-row gap-2'>{(() => {
             const arr = [];
             for (let i = 1; i < allPages+1; i++) {

@@ -71,7 +71,7 @@ exports.product_create = asyncHandler( async (req, res, next) => {
     const query = await insertProduct();
 
     if (query.length !== 0) {
-        res.status(200).json({data: query, msg: 'Product successfully added!'})
+        res.status(200).json({msg: 'Product successfully added!'})
         return await browser.close()
     } else {
         res.status(404).json({err: "Product could not be created."})
