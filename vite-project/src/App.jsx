@@ -24,7 +24,7 @@ function App() {
       if (response.status === 200) {
         console.log(data)
         setAllProducts(data[0]) 
-        setAllPages(Math.floor(data[1][0].COUNT/6) + 1) 
+        setAllPages(Math.floor(data[1][0].COUNT/7) + 1) 
       }
     } catch (err) {
       console.log(err)
@@ -42,7 +42,7 @@ function App() {
       if (response.status === 200) {
         console.log(data)
         setAllProducts(data[0])
-        setAllPages(Math.floor(data[1][0].COUNT/6) + 1) 
+        setAllPages(Math.floor(data[1][0].COUNT/7) + 1) 
       }
     } catch (err) {
       console.log(err)
@@ -56,8 +56,8 @@ function App() {
     return () => {
       ignore = true;
     }
-  }, [])
-  
+  }, []);
+
   return (
     <div className='h-full w-screen bg-slate-100 flex flex-col items-center align-center p-10 gap-2'>
       <h1 className='text-6xl font-serif text-extrabold'>what's today's price?</h1>
@@ -74,7 +74,7 @@ function App() {
             for (let i = 1; i < allPages+1; i++) {
                 arr.push(
                     <ul key={i}>
-                        <li onClick={sort ? () => sortBy(sortText, i)  : () => { retrieveProducts(i); setPage(i) }} className='text-xxs cursor-pointer'>{i}</li>
+                        <li onClick={sort ? () => sortBy(sortText, i) : () => { retrieveProducts(i); setPage(i) }} className='text-xxs cursor-pointer'>{i}</li>
                     </ul>
                 );
             }

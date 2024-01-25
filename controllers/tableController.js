@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler')
 const db = require('../connection')
+const queryDatabase = require('../querydb')
 
 exports.table_create_post = asyncHandler(async (req, res, next) => {
     let sql = `CREATE TABLE myproducts(
@@ -11,15 +12,8 @@ exports.table_create_post = asyncHandler(async (req, res, next) => {
         url VARCHAR(500),
         image_url VARCHAR(500)
         );`
-    const createTable = () => {
-        return new Promise ( (resolve, reject) => {
-            db.query(sql, (err, result) => {
-                if (err) return reject(err);
-                return resolve(result);
-            })
-        })
-    }
-   const query = await createTable();
+
+   const query = await queryDatabase(sql);
    
    if (query) {
     return res.status(200).json('Table created!')
@@ -29,30 +23,14 @@ exports.table_create_post = asyncHandler(async (req, res, next) => {
 })
 
 exports.table_get = asyncHandler( async (req, res, next) => {
-    const getCount = () => {
-        let sql = `SELECT COUNT(*) AS COUNT FROM myproducts`
-        return new Promise ((resolve, reject) => {
-            db.query(sql, (err, result) => {
-                if (err) return reject(err)
-                return resolve(result)
-            })
-        })
-    };
+
 
     let page = ((req.query.page - 1) * 6);
-
-    const getAllProducts = (sql) => {
-        return new Promise ((resolve, reject) => {
-            db.query(sql, (err, result) => {
-                if (err) return reject(err)
-                return resolve(result)
-            })
-        })
-    }
+    let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts`
 
     if (req.query.search) {
-        let sql = `SELECT * FROM myproducts ORDER BY ${req.query.search} LIMIT 6 OFFSET ${page}`
-        const query = await Promise.all( [ getAllProducts(sql), getCount()])
+        let sql = `SELECT * FROM myproducts ORDER BY ${req.query.search} LIMIT 6 OFFSET ${page}`;
+        const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)])
         if (query[0].length !== 0) {
             return res.status(200).json(query);
         } else {
@@ -60,7 +38,7 @@ exports.table_get = asyncHandler( async (req, res, next) => {
         }
     } else {
         let sql = `SELECT * FROM myproducts ORDER BY id DESC LIMIT 6 OFFSET ${page}`
-        const query = await Promise.all( [ getAllProducts(sql), getCount()])
+        const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)])
         if (query[0].length !== 0) {
             return res.status(200).json(query);
         } else {
