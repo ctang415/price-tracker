@@ -4,14 +4,28 @@ const puppeteer = require('puppeteer');
 const queryDatabase = require('../querydb')
 
 exports.product_get = asyncHandler ( async (req, res, next) => {
- 
-    let sql = `SELECT * FROM myproducts WHERE url LIKE '%${req.params.url}%'`;
+
+    if (req.query.url !== undefined) {
+    let sql = `SELECT * FROM myproducts WHERE url LIKE '%${req.query.url}%'`;
    
     const query = await queryDatabase(sql);
     if (query.length === 0) {
         return res.status(200).json({success: false})
     } else {
         return res.status(400).json({msg: "This product is already being tracked."})
+    }
+    } else {
+        let page = ((req.query.page - 1) * 6);
+        let sql = `SELECT * FROM myproducts WHERE name LIKE '%${req.query.search}%' ORDER BY id DESC LIMIT 6 OFFSET ${page}`;
+        let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts where name like '%${req.query.search}%'`
+        
+        const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)])
+
+        if (query.length !== 0) {
+            return res.status(200).json(query)
+        } else {
+            return res.status(400).json({msg: "Item not found."})
+        }   
     }
 
 })

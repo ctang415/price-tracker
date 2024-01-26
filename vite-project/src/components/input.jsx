@@ -1,4 +1,5 @@
 import { useState } from "react"
+import SubmitButton from "./submitbutton"
 
 const Input = ({retrieveProducts, page}) => {
     const [ link, setLink ] = useState('')
@@ -6,7 +7,7 @@ const Input = ({retrieveProducts, page}) => {
     const checkUrl = async (e) => {
         e.preventDefault()
         try {
-            const response = await fetch (`http://localhost:3000/products/${link.slice(-10)}`);
+            const response = await fetch (`http://localhost:3000/products/?url=${link}`);
             if (!response.ok) {
                 if(response.status === 400) {
                     throw await response.json();
@@ -40,11 +41,11 @@ const Input = ({retrieveProducts, page}) => {
     }
 
     return (
-        <form className="p-4 flex flex-row gap-2" onSubmit={(e) => checkUrl(e)}>
-            <input className="rounded-xl p-2" type='search' placeholder="Add the link to your product here"
+        <form className="p-4 flex flex-row gap-4 w-2/5 justify-center" onSubmit={(e) => checkUrl(e)}>
+            <input className="rounded-xl p-2 min-w-full" type='search' placeholder="Add the direct link to your product here"
             onChange={(e) => setLink(e.target.value)}>
             </input>
-            <button className="bg-slate-500 text-white border-none border-0 hover:bg-slate-400" type='submit'>ADD</button>
+            <SubmitButton name={"Add"}/>
         </form>
     )
 }

@@ -15,7 +15,6 @@ const Product = ({product, setAllProducts, allProducts, retrieveProducts, page})
             const data = await response.json();
             if (response.status === 200) {
                 alert('Item successfully removed!')
-                //setAllProducts(allProducts.filter(x => x.id !== id))
                 retrieveProducts(page)
             }
         } catch (err) {
@@ -25,7 +24,8 @@ const Product = ({product, setAllProducts, allProducts, retrieveProducts, page})
     }
 
     return (
-        <li key={product.id} className='max-w-xs flex flex-col border-4 border-white p-2 items-center rounded-md bg-white gap-4'>
+        <li key={product.id} className='max-w-xs flex flex-col border-2 border-slate-200 p-8 items-center rounded-md bg-white gap-4
+        shadow-2xl'>
             <Button product={product} removeItem={removeItem}/>
             <Link key={product.id} to={product.url} className='self-center'>
                 <img className="max-h-30" src={product.image_url} alt="Product image"/>

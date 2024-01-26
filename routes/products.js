@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const productsController = require('../controllers/productsController')
 
-router.get('/:url', productsController.product_get)
+router.get('/', productsController.product_get)
 
 //router.get('/create', productsController.product_test)
 

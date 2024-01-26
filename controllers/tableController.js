@@ -24,25 +24,34 @@ exports.table_create_post = asyncHandler(async (req, res, next) => {
 
 exports.table_get = asyncHandler( async (req, res, next) => {
 
-
     let page = ((req.query.page - 1) * 6);
-    let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts`
 
-    if (req.query.search) {
-        let sql = `SELECT * FROM myproducts ORDER BY ${req.query.search} LIMIT 6 OFFSET ${page}`;
+    if (req.query.sort) {
+        let sql = `SELECT * FROM myproducts ORDER BY ${req.query.sort} LIMIT 6 OFFSET ${page}`;
+        let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts`
         const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)])
         if (query[0].length !== 0) {
             return res.status(200).json(query);
         } else {
             return res.status(404).json({err: "Something went wrong."})
         }
+    } else if (req.query.search) {
+        let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts where name like '%${req.query.search}'`
+        let sql = `SELECT * FROM myproducts where name like '%${req.query.search}%' LIMIT 6 OFFSET ${page}`;
+        const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)])
+            if (query[0].length !== 0) {
+                return res.status(200).json(query);
+            } else {
+                return res.status(404).json({err: "Something went wrong."})
+            }
     } else {
+        let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts`
         let sql = `SELECT * FROM myproducts ORDER BY id DESC LIMIT 6 OFFSET ${page}`
         const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)])
-        if (query[0].length !== 0) {
-            return res.status(200).json(query);
-        } else {
-            return res.status(404).json({err: "Something went wrong."})
-        }
+            if (query[0].length !== 0) {
+                return res.status(200).json(query);
+            } else {
+                return res.status(404).json({err: "Something went wrong."})
+            }
     }
 })
