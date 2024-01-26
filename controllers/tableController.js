@@ -1,8 +1,7 @@
-const asyncHandler = require('express-async-handler')
-const db = require('../connection')
 const queryDatabase = require('../querydb')
 
-exports.table_create_post = asyncHandler(async (req, res, next) => {
+exports.table_create_post = (async (req, res, next) => {
+    try {
     let sql = `CREATE TABLE myproducts(
         id INT AUTO_INCREMENT PRIMARY KEY, 
         name VARCHAR(150),
@@ -20,10 +19,13 @@ exports.table_create_post = asyncHandler(async (req, res, next) => {
    } else {
     return res.status(400).json('Something went wrong.')
    }
+    } catch (err) {
+        console.log(err)
+    }
 })
 
-exports.table_get = asyncHandler( async (req, res, next) => {
-
+exports.table_get = ( async (req, res, next) => {
+    try {
     let page = ((req.query.page - 1) * 6);
 
     if (req.query.sort) {
@@ -53,5 +55,8 @@ exports.table_get = asyncHandler( async (req, res, next) => {
             } else {
                 return res.status(404).json({err: "Something went wrong."})
             }
+    }
+    } catch (err) {
+        console.log(err)
     }
 })

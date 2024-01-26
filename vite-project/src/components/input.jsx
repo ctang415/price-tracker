@@ -2,10 +2,12 @@ import { useState } from "react"
 import SubmitButton from "./submitbutton"
 
 const Input = ({retrieveProducts, page}) => {
-    const [ link, setLink ] = useState('')
+    const [ link, setLink ] = useState('');
+    const [ error, setError ] = useState('');
 
     const checkUrl = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
+        setError('');
         try {
             const response = await fetch (`http://localhost:3000/products/?url=${link}`);
             if (!response.ok) {
@@ -18,11 +20,12 @@ const Input = ({retrieveProducts, page}) => {
                 scrapeWebsite()
             }
         } catch (err) {
-            console.log(err)
+            setError(err.msg);
         }
     }
 
     async function scrapeWebsite () {
+        setError('')
         try {
             const response = await fetch (`http://localhost:3000/products`, {
                 method: 'POST', headers: {'Content-type': 'application/json'}, 
@@ -34,19 +37,24 @@ const Input = ({retrieveProducts, page}) => {
             const data = await response.json();
             if (response.status === 200) {
                 retrieveProducts(page)
+                setLink('')
+                console.log(data)
             }
         } catch (err) {
-            console.log(err);
+            setError(err.msg)
         }
     }
 
     return (
+        <>
         <form className="p-4 flex flex-row gap-4 w-2/5 justify-center" onSubmit={(e) => checkUrl(e)}>
             <input className="rounded-xl p-2 min-w-full" type='search' placeholder="Add the direct link to your product here"
-            onChange={(e) => setLink(e.target.value)}>
+            value={link} onChange={(e) => setLink(e.target.value)}>
             </input>
             <SubmitButton name={"Add"}/>
         </form>
+        <span className="text-red-500 font-bold">{error}</span>
+        </>
     )
 }
 
