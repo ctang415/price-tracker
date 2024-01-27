@@ -5,30 +5,28 @@ exports.product_get =  ( async (req, res, next) => {
     try {
         if (req.query.url !== undefined) {
             let sql = `SELECT * FROM myproducts WHERE url = "${req.query.url}"`;
-   
             const query = await queryDatabase(sql);
             if (query.length === 0) {
-                return res.status(200).json({success: false})
+                return res.status(200).json({success: false});
             } else {
-                return res.status(400).json({msg: "This product is already being tracked."})
+                return res.status(400).json({msg: "This product is already being tracked."});
             }
         } else {
             let page = ((req.query.page - 1) * 6);
             let sql = `SELECT * FROM myproducts WHERE name LIKE '%${req.query.search}%' ORDER BY id DESC LIMIT 6 OFFSET ${page}`;
-            let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts where name like '%${req.query.search}%'`
-        
-            const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)])
+            let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts where name like '%${req.query.search}%'`;
+            const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)]);
 
             if (query.length !== 0) {
-                return res.status(200).json(query)
+                return res.status(200).json(query);
             } else {
-                return res.status(400).json({msg: "Item not found."})
+                return res.status(400).json({msg: "Item not found."});
             }   
         }
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
-})
+});
 
 exports.product_create = ( async (req, res, next) => {
     try {
@@ -47,39 +45,35 @@ exports.product_create = ( async (req, res, next) => {
      
         const item = await page.evaluate(() => {
             const name = [...document.querySelectorAll('title, h1')].map(elem => elem.innerText).filter(el => el).map(elem => elem.replaceAll('\n', '').trim());
-            const price = [...document.querySelectorAll(
-            'span[data-testid*="price"], span[class*="price"]:not(footer), span[class*="Price"]:not(footer), div[class*="Price"]:not(footer), div[class*="price"]:not(footer)'
-            )].map(el => el.innerText.includes('$') ? parseInt(el.innerText.replace('$', '')) : parseInt(el.innerText)).filter(el => el).filter( (el, index, arr) => arr.indexOf(el) === index).slice(0,2).sort((a, b) => {return a - b })
+            const price = [...document.querySelectorAll('span[data-testid*="price"], span[class*="price"]:not(footer), span[class*="Price"]:not(footer), div[class*="Price"]:not(footer), div[class*="price"]:not(footer)')].map(el => el.innerText.includes('$') ? parseInt(el.innerText.replace('$', '')) : parseInt(el.innerText)).filter(el => el).filter( (el, index, arr) => arr.indexOf(el) === index).slice(0,2).sort((a, b) => {return a - b });
             let image;
             image = [...document.querySelectorAll(`img[alt*="${name[0].slice(name[0].length/2, (name[0].length/2) + 8)}"]`)].map(elem => elem.getAttribute('src'));
             if (image.length === 0) {
-                image = [...document.querySelectorAll('div[class*="product"] > img')].map(elem => elem.getAttribute('src'))
+                image = [...document.querySelectorAll('div[class*="product"] > img')].map(elem => elem.getAttribute('src'));
                 if (image.length === 0) {
-                    image = [...document.querySelectorAll(`picture > img[loading="eager"]`)].map(elem => elem.getAttribute('src'))
-                    return { name, price, image }       
+                    image = [...document.querySelectorAll(`picture > img[loading="eager"]`)].map(elem => elem.getAttribute('src'));
+                    return { name, price, image }
                 }
                 return { name, price, image}
             } 
             return {name, price, image}
         })
-        console.log(item)
+        console.log(item);
 
         if (item.name[0] !== undefined) {
             if (item.price[0] == undefined && item.image[0] == undefined) {
-                let insertSql = `INSERT INTO myproducts (name, url) 
-                VALUES ("${item.name[0]}", "${req.body.link}")`
+                let insertSql = `INSERT INTO myproducts (name, url) VALUES ("${item.name[0]}", "${req.body.link}")`;
                 const query = await queryDatabase(insertSql);
 
                 if (query.length !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
-                    return await browser.close()
+                    return await browser.close();
                 } else {
                     res.status(404).json({err: "Product could not be added."});
-                    return await browser.close()
+                    return await browser.close();
                 }
             } else if (item.price[0] == undefined) {
-                let insertSql = `INSERT INTO myproducts (name, url, image_url) 
-                VALUES ("${item.name[0]}", "${req.body.link}", "${item.url[0]}")`
+                let insertSql = `INSERT INTO myproducts (name, url, image_url) VALUES ("${item.name[0]}", "${req.body.link}", "${item.url[0]}")`;
                 const query = await queryDatabase(insertSql);
 
                 if (query.length !== 0) {
@@ -90,8 +84,7 @@ exports.product_create = ( async (req, res, next) => {
                     return await browser.close();
                 }
             } else if (item.image[0] == undefined) {
-                let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url) 
-                VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, "${req.body.link}")`
+                let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url) VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, "${req.body.link}")`;
                 const query = await queryDatabase(insertSql);
 
                 if (query.length !== 0) {
@@ -102,9 +95,7 @@ exports.product_create = ( async (req, res, next) => {
                     return await browser.close();
                 }
             } else {
-                let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url, image_url) 
-                VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, "${req.body.link}", "${item.image[0]}")`
-
+                let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url, image_url) VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, "${req.body.link}", "${item.image[0]}")`
                 const query = await queryDatabase(insertSql);
 
                 if (query.length !== 0) {
@@ -120,27 +111,12 @@ exports.product_create = ( async (req, res, next) => {
             return await browser.close();
         }
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
-})
-
-exports.product_test = ( async (req, res, next) => {
-    //let sql = "INSERT INTO myproducts (name, price, lowest_price, url, image_url) VALUES ('HIKING STICKS', 55, 55, 'https://www.amazon.com/gp/product/B07DYKZD7X?th=1', 'https://m.media-amazon.com/images/I/6134PIDPt0L._AC_SL1200_.jpg')"
-    let sql = "INSERT INTO myproducts (name, price, lowest_price, url, image_url) VALUES ('REEBOK CLUB C SNEAKERS', 60, 60, 'https://www.pacsun.com/reebok/womens-cream-club-c-85-vintage-sneakers-0705244.html?store=&country=US&currency=USD&OriginId=GOG&XCIDP=P%3AG_Shopping_PMAX_W_Shoes&gad_source=4&gclid=CjwKCAiAqY6tBhAtEiwAHeRopVHblvOqw2i0c7tTkzmscslNjP-n8XNpY-2F64f5YEq_GC0ZtF-udhoCr9YQAvD_BwE&gclsrc=aw.ds', 'https://www.pacsun.com/dw/image/v2/AAJE_PRD/on/demandware.static/-/Sites-pacsun_storefront_catalog/default/dwba8970fc/product_images/0542491370018NEW_01_569.jpg?sw=3000')"
-    
-    const query = await queryDatabase(sql);
-
-    if (query.length !== 0) {
-        return console.log(query)
-    } else {
-        return console.log('no')
-    }
-})
-
+});
 
 exports.product_put =  ( async (req, res, next) => {
-
-        let sql = `SELECT id, price, lowest_price, url FROM myproducts`
+        let sql = `SELECT id, price, lowest_price, url FROM myproducts`;
         const listOfProducts = await queryDatabase(sql);
         const browser = await puppeteer.launch( {headless: true});
         const page = await browser.newPage();
@@ -149,20 +125,18 @@ exports.product_put =  ( async (req, res, next) => {
     
         for (let x = 0; x < listOfProducts.length; x++) {
             try {
-            await page.goto(listOfProducts[x].url, {
-                waitUntil: "domcontentloaded"
-            })
+                await page.goto(listOfProducts[x].url, {
+                    waitUntil: "domcontentloaded"
+                });
 
-            await page.waitForSelector('img');
+                await page.waitForSelector('img');
 
-            const item = await page.evaluate(() => {
-                const price = [...document.querySelectorAll(
-                'span[data-testid*="price"], span[class*="price"]:not(footer), span[class*="Price"]:not(footer), div[class*="Price"]:not(footer), div[class*="price"]:not(footer)'
-                )].map(el => el.innerText.includes('$') ? parseInt(el.innerText.replace('$', '')) : parseInt(el.innerText)).filter(el => el).filter( (el, index, arr) => arr.indexOf(el) === index).slice(0,2).sort((a, b) => {return a - b })
+                const item = await page.evaluate(() => {
+                    const price = [...document.querySelectorAll('span[data-testid*="price"], span[class*="price"]:not(footer), span[class*="Price"]:not(footer), div[class*="Price"]:not(footer), div[class*="price"]:not(footer)')].map(el => el.innerText.includes('$') ? parseInt(el.innerText.replace('$', '')) : parseInt(el.innerText)).filter(el => el).filter( (el, index, arr) => arr.indexOf(el) === index).slice(0,2).sort((a, b) => {return a - b });
         
-                return { price }
-            })
-            console.log(item)
+                    return { price }
+                })
+                console.log(item);
     
             if (item.price[0] < listOfProducts[x].lowest_price) {
                 let updateSql = `UPDATE myproducts
@@ -179,24 +153,24 @@ exports.product_put =  ( async (req, res, next) => {
 
             }
         } catch (err) {
-            console.log(err)
+            console.log(err);
         }
     }
         await browser.close();
-})
+});
 
 exports.product_delete = ( async (req, res, next) => {
     try {
-        let sql = `DELETE FROM myproducts where id = ${req.params.productid}`
+        let sql = `DELETE FROM myproducts where id = ${req.params.productid}`;
     
         const query = await queryDatabase(sql);
 
         if (query.length !== 0) {
-            return res.status(200).json({msg: 'Product successfully removed!'})
+            return res.status(200).json({msg: 'Product successfully removed!'});
         } else {
             return res.status(404).json({err: "Product could not be removed."});
         }
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
-})
+});

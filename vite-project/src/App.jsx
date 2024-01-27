@@ -1,78 +1,76 @@
-import { useEffect } from 'react'
-import { useState } from 'react'
-import './app.css'
-import Input from './components/input'
-import Products from './components/products'
-import Search from './components/search'
+import { useEffect } from 'react';
+import { useState } from 'react';
+import './app.css';
+import Input from './components/input';
+import Products from './components/products';
+import Search from './components/search';
 
-function App() {
+function App(){
   const [allProducts, setAllProducts] = useState([]);
   const [allPages, setAllPages] = useState(0);
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState(false);
-  const [search, setSearch] = useState(false)
-  const [sortText, setSortText] = useState('')
+  const [search, setSearch] = useState(false);
+  const [sortText, setSortText] = useState('');
   
   let ignore = false;
 
   const retrieveProducts = async (pageNum) => {
     try {
-      const response = await fetch (`http://localhost:3000/?page=${pageNum}`)
+      const response = await fetch (`http://localhost:3000/?page=${pageNum}`);
       if (!response.ok) {
         if (response.status === 404) {
-          throw await response.json()
+          throw await response.json();
         }
-      } 
-      const data = await response.json()
+      }
+      const data = await response.json();
       if (response.status === 200) {
-        console.log(data)
-        setAllProducts(data[0]) 
-        setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1) 
+        console.log(data);
+        setAllProducts(data[0]);
+        setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1);
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }
 
   const sortBy = async (sort, page) => {
     if (!search) {
-    try {
-      const response = await fetch (`http://localhost:3000/?sort=${sort}&page=${page}`, {
-      })
-      if (!response.ok) {
-        throw await response.json()
-      }
-      const data = await response.json();
-      if (response.status === 200) {
-        console.log(data)
-        setAllProducts(data[0])
-        setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1) 
-      }
-    } catch (err) {
-      console.log(err)
-    }
-      } else {
       try {
-        const response = await fetch (`http://localhost:3000/?search=${sort}&page=${page}`, {
-        })
+        const response = await fetch (`http://localhost:3000/?sort=${sort}&page=${page}`);
         if (!response.ok) {
-          throw await response.json()
+          throw await response.json();
         }
         const data = await response.json();
         if (response.status === 200) {
-          console.log(data)
-          setAllProducts(data[0])
-          setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1) 
+          console.log(data);
+          setAllProducts(data[0]);
+          setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1) ;
         }
       } catch (err) {
-        console.log(err)
+        console.log(err);
+      }
+    } else {
+      try {
+        const response = await fetch (`http://localhost:3000/?search=${sort}&page=${page}`)
+        if (!response.ok) {
+          throw await response.json();
+        }
+        const data = await response.json();
+        if (response.status === 200) {
+          console.log(data);
+          setAllProducts(data[0]);
+          setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1);
+        }
+      } catch (err) {
+        console.log(err);
       }
     }
   }
 
   useEffect(() => {
     if (!ignore) {
-      retrieveProducts(1)
+      retrieveProducts(1);
     }
     return () => {
       ignore = true;
@@ -83,16 +81,16 @@ function App() {
     try {
       const response = await fetch (`http://localhost:3000/products`, {
         method: 'PUT', headers: {'Content-type': 'application/json'}
-      })
+      });
       if (!response.ok) {
         throw await response.json();
       }
       const data = await response.json();
       if (response.status === 200) {
-        console.log(data)
+        console.log(data);
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }
 

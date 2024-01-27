@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import Button from './button'
+import { Link } from 'react-router-dom';
+import Button from './button';
 
 const Product = ({product, setAllProducts, allProducts, retrieveProducts, page}) => {
 
@@ -8,18 +7,18 @@ const Product = ({product, setAllProducts, allProducts, retrieveProducts, page})
        try {
             const response = await fetch (`http://localhost:3000/products/${id}`, {
                 method: 'DELETE', credentials: 'include'
-            })
+            });
             if (!response.ok) {
                 throw await response.json();
             }
             const data = await response.json();
             if (response.status === 200) {
-                alert('Item successfully removed!')
-                retrieveProducts(page)
+                alert('Item successfully removed!');
+                retrieveProducts(page);
             }
         } catch (err) {
-            retrieveProducts(page--)
-            console.log(err)
+            retrieveProducts(page--);
+            console.log(err);
         }
     }
 

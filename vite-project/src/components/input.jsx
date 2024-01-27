@@ -1,5 +1,5 @@
-import { useState } from "react"
-import SubmitButton from "./submitbutton"
+import { useState } from "react";
+import SubmitButton from "./submitbutton";
 
 const Input = ({retrieveProducts, page}) => {
     const [ link, setLink ] = useState('');
@@ -17,31 +17,31 @@ const Input = ({retrieveProducts, page}) => {
             }
             const data = await response.json();
             if (response.status === 200) {
-                scrapeWebsite()
+                scrapeWebsite();
             }
         } catch (err) {
             setError(err.msg);
         }
     }
 
-    async function scrapeWebsite () {
-        setError('')
+    async function scrapeWebsite() {
+        setError('');
         try {
             const response = await fetch (`http://localhost:3000/products`, {
                 method: 'POST', headers: {'Content-type': 'application/json'}, 
                 credentials: 'include', body: JSON.stringify({link: link})
-            })
+            });
             if (!response.ok) {
                 throw await response.json();
             }
             const data = await response.json();
             if (response.status === 200) {
-                retrieveProducts(page)
-                setLink('')
-                console.log(data)
+                retrieveProducts(page);
+                setLink('');
+                console.log(data);
             }
         } catch (err) {
-            setError(err.msg)
+            setError(err.msg);
         }
     }
 

@@ -1,4 +1,4 @@
-import Product from "./product"
+import Product from "./product";
 
 const Products = ({setAllProducts, allProducts, retrieveProducts, page}) => {
 

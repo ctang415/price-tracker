@@ -1,4 +1,3 @@
-
 const Button = ({removeItem, product}) => {
 
     return (
