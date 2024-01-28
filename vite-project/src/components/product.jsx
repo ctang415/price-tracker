@@ -17,8 +17,9 @@ const Product = ({product, setAllProducts, allProducts, retrieveProducts, page})
                 retrieveProducts(page);
             }
         } catch (err) {
-            retrieveProducts(page--);
-            console.log(err);
+            //retrieveProducts(page--);
+            alert(`${err.err}`)
+            console.log(err.err);
         }
     }
 

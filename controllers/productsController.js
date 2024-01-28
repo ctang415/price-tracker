@@ -2,43 +2,34 @@ const puppeteer = require('puppeteer');
 const queryDatabase = require('../querydb');
 
 exports.product_get =  ( async (req, res, next) => {
-    try {
-        if (req.query.url !== undefined) {
-            let sql = `SELECT * FROM myproducts WHERE url = "${req.query.url}"`;
-            const query = await queryDatabase(sql);
-            if (query.length === 0) {
-                return res.status(200).json({success: false});
-            } else {
-                return res.status(400).json({msg: "This product is already being tracked."});
-            }
+    if (req.query.url !== undefined) {
+        let sql = `SELECT * FROM myproducts WHERE url = "${req.query.url}"`;
+        const query = await queryDatabase(sql);
+        if (query.length === 0) {
+            return res.status(200).json({success: false});
         } else {
-            let page = ((req.query.page - 1) * 6);
-            let sql = `SELECT * FROM myproducts WHERE name LIKE '%${req.query.search}%' ORDER BY id DESC LIMIT 6 OFFSET ${page}`;
-            let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts where name like '%${req.query.search}%'`;
-            const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)]);
-
-            if (query.length !== 0) {
-                return res.status(200).json(query);
-            } else {
-                return res.status(400).json({msg: "Item not found."});
-            }   
+            return res.status(400).json({msg: "This product is already being tracked."});
         }
-    } catch (err) {
-        console.log(err);
+    } else {
+        let page = ((req.query.page - 1) * 6);
+        let sql = `SELECT * FROM myproducts WHERE name LIKE '%${req.query.search}%' ORDER BY id DESC LIMIT 6 OFFSET ${page}`;
+        let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts where name like '%${req.query.search}%'`;
+        const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)]);
+
+        if (query.length !== 0) {
+            return res.status(200).json(query);
+        } else {
+            return res.status(400).json({msg: "Item not found."});
+        }
     }
 });
 
 exports.product_create = ( async (req, res, next) => {
     try {
-        const browser = await puppeteer.launch({
-            headless: false
-        });
+        const browser = await puppeteer.launch({headless: false});
         const page = await browser.newPage();
 
-        await page.goto(req.body.link, {
-            waitUntil: "domcontentloaded",
-        });
-      
+        await page.goto(req.body.link, {waitUntil: "domcontentloaded", });
         await page.waitForSelector('img');
         const userAgent = 'Mozilla/5.0 (X11; Linux x86_64)' + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36';
         await page.setUserAgent(userAgent);
@@ -64,8 +55,7 @@ exports.product_create = ( async (req, res, next) => {
             if (item.price[0] == undefined && item.image[0] == undefined) {
                 let insertSql = `INSERT INTO myproducts (name, url) VALUES ("${item.name[0]}", "${req.body.link}")`;
                 const query = await queryDatabase(insertSql);
-
-                if (query.length !== 0) {
+                if (query.affectedRows !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
                     return await browser.close();
                 } else {
@@ -76,7 +66,7 @@ exports.product_create = ( async (req, res, next) => {
                 let insertSql = `INSERT INTO myproducts (name, url, image_url) VALUES ("${item.name[0]}", "${req.body.link}", "${item.url[0]}")`;
                 const query = await queryDatabase(insertSql);
 
-                if (query.length !== 0) {
+                if (query.affectedRows !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
                     return await browser.close();
                 } else {
@@ -87,7 +77,7 @@ exports.product_create = ( async (req, res, next) => {
                 let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url) VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, "${req.body.link}")`;
                 const query = await queryDatabase(insertSql);
 
-                if (query.length !== 0) {
+                if (query.affectedRows !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
                     return await browser.close();
                 } else {
@@ -98,7 +88,7 @@ exports.product_create = ( async (req, res, next) => {
                 let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url, image_url) VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, "${req.body.link}", "${item.image[0]}")`
                 const query = await queryDatabase(insertSql);
 
-                if (query.length !== 0) {
+                if (query.affectedRows !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
                     return await browser.close();
                 } else {
@@ -116,61 +106,52 @@ exports.product_create = ( async (req, res, next) => {
 });
 
 exports.product_put =  ( async (req, res, next) => {
-        let sql = `SELECT id, price, lowest_price, url FROM myproducts`;
-        const listOfProducts = await queryDatabase(sql);
-        const browser = await puppeteer.launch( {headless: true});
-        const page = await browser.newPage();
-        const userAgent = 'Mozilla/5.0 (X11; Linux x86_64)' + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36';
-        await page.setUserAgent(userAgent);
-    
-        for (let x = 0; x < listOfProducts.length; x++) {
-            try {
-                await page.goto(listOfProducts[x].url, {
-                    waitUntil: "domcontentloaded"
-                });
+    let sql = `SELECT id, price, lowest_price, url FROM myproducts`;
+    const listOfProducts = await queryDatabase(sql);
+    const userAgent = 'Mozilla/5.0 (X11; Linux x86_64)' + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36';
 
-                await page.waitForSelector('img');
+    for (let x = 0; x < listOfProducts.length; x++) {
+        try {
+            const browser = await puppeteer.launch( {headless: 'new'});
+            const page = await browser.newPage();
+            await page.setUserAgent(userAgent);
+            await page.goto(listOfProducts[x].url, {waitUntil: "domcontentloaded"});
+            await page.waitForSelector('img');
 
-                const item = await page.evaluate(() => {
-                    const price = [...document.querySelectorAll('span[data-testid*="price"], span[class*="price"]:not(footer), span[class*="Price"]:not(footer), div[class*="Price"]:not(footer), div[class*="price"]:not(footer)')].map(el => el.innerText.includes('$') ? parseInt(el.innerText.replace('$', '')) : parseInt(el.innerText)).filter(el => el).filter( (el, index, arr) => arr.indexOf(el) === index).slice(0,2).sort((a, b) => {return a - b });
-        
-                    return { price }
-                })
-                console.log(item);
+            const item = await page.evaluate(() => {
+                const price = [...document.querySelectorAll('span[data-testid*="price"], span[class*="price"]:not(footer), span[class*="Price"]:not(footer), div[class*="Price"]:not(footer), div[class*="price"]:not(footer)')].map(el => el.innerText.includes('$') ? parseInt(el.innerText.replace('$', '')) : parseInt(el.innerText)).filter(el => el).filter( (el, index, arr) => arr.indexOf(el) === index).slice(0,2).sort((a, b) => {return a - b });
+                return { price }
+            });
+            console.log(item);
     
             if (item.price[0] < listOfProducts[x].lowest_price) {
                 let updateSql = `UPDATE myproducts
                 SET price = ${item.price[0]},
                 lowest_price = ${item.price[0]}, 
                 lowest_price_date = CURRENT_DATE
-                WHERE url = "${listOfProducts[x].url}"`;
+                WHERE url = "${listOfProducts[x].url}"`;                   
                 const query = await queryDatabase(updateSql);
             } else {
                 let sql = `UPDATE myproducts
                 SET price = ${item.price[0]}
                 WHERE url = "${listOfProducts[x].url}"`;
                 const query = await queryDatabase(sql);
-
             }
+            await browser.close()
         } catch (err) {
             console.log(err);
+            await browser.close();
         }
     }
-        await browser.close();
 });
 
 exports.product_delete = ( async (req, res, next) => {
-    try {
-        let sql = `DELETE FROM myproducts where id = ${req.params.productid}`;
-    
-        const query = await queryDatabase(sql);
-
-        if (query.length !== 0) {
-            return res.status(200).json({msg: 'Product successfully removed!'});
-        } else {
-            return res.status(404).json({err: "Product could not be removed."});
-        }
-    } catch (err) {
-        console.log(err);
+    let sql = `DELETE FROM myproducts where id = ${req.params.productid}`;
+    const query = await queryDatabase(sql);
+ 
+    if (query.affectedRows !== 0) {
+        return res.status(200).json({msg: 'Product successfully removed!'});
+    } else {
+        return res.status(404).json({err: "Product could not be removed."});
     }
 });
