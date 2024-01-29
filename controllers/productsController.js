@@ -26,23 +26,22 @@ exports.product_get =  ( async (req, res, next) => {
 
 exports.product_create = ( async (req, res, next) => {
     try {
-        const browser = await puppeteer.launch({headless: false});
+        const browser = await puppeteer.launch({headless: true});
         const page = await browser.newPage();
-
-        await page.goto(req.body.link, {waitUntil: "domcontentloaded", });
-        await page.waitForSelector('img');
         const userAgent = 'Mozilla/5.0 (X11; Linux x86_64)' + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36';
         await page.setUserAgent(userAgent);
-     
+        await page.goto(req.body.link, {waitUntil: "domcontentloaded", });
+        await page.waitForSelector('img');
+    
         const item = await page.evaluate(() => {
             const name = [...document.querySelectorAll('title, h1')].map(elem => elem.innerText).filter(el => el).map(elem => elem.replaceAll('\n', '').trim());
             const price = [...document.querySelectorAll('span[data-testid*="price"], span[class*="price"]:not(footer), span[class*="Price"]:not(footer), div[class*="Price"]:not(footer), div[class*="price"]:not(footer)')].map(el => el.innerText.includes('$') ? parseInt(el.innerText.replace('$', '')) : parseInt(el.innerText)).filter(el => el).filter( (el, index, arr) => arr.indexOf(el) === index).slice(0,2).sort((a, b) => {return a - b });
             let image;
-            image = [...document.querySelectorAll(`img[alt*="${name[0].slice(name[0].length/2, (name[0].length/2) + 8)}"]`)].map(elem => elem.getAttribute('src'));
+            image = [...document.querySelectorAll(`img[alt*="${name[0].split('')[0]}"]`)].map(elem => elem.getAttribute('src')).filter(el => el);
             if (image.length === 0) {
-                image = [...document.querySelectorAll('div[class*="product"] > img')].map(elem => elem.getAttribute('src'));
+                image = [...document.querySelectorAll('div[class*="product"] > img')].map(elem => elem.getAttribute('src')).filter(el => el);
                 if (image.length === 0) {
-                    image = [...document.querySelectorAll(`picture > img[loading="eager"]`)].map(elem => elem.getAttribute('src'));
+                    image = [...document.querySelectorAll(`picture > img[loading="eager"]`)].map(elem => elem.getAttribute('src')).filter(el => el);
                     return { name, price, image }
                 }
                 return { name, price, image}
@@ -140,7 +139,6 @@ exports.product_put =  ( async (req, res, next) => {
             await browser.close()
         } catch (err) {
             console.log(err);
-            await browser.close();
         }
     }
 });

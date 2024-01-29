@@ -12,7 +12,7 @@ function App(){
   const [sort, setSort] = useState(false);
   const [search, setSearch] = useState(false);
   const [sortText, setSortText] = useState('');
-  
+
   let ignore = false;
 
   const retrieveProducts = async (pageNum) => {
@@ -77,27 +77,9 @@ function App(){
     }
   }, []);
 
-  async function runScrape () {
-    try {
-      const response = await fetch (`http://localhost:3000/products`, {
-        method: 'PUT', headers: {'Content-type': 'application/json'}
-      });
-      if (!response.ok) {
-        throw await response.json();
-      }
-      const data = await response.json();
-      if (response.status === 200) {
-        console.log(data);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
   return (
     <div className='h-full w-screen bg-slate-100 flex flex-col items-center align-center p-10 gap-2'>
       <h1 className='text-6xl font-serif text-extrabold'>what's today's price?</h1>
-      <button className='bg-black' onClick={() => runScrape()}/>
       <Input retrieveProducts={retrieveProducts} page={page}/>
       <Search setSearch={setSearch} sortText={sortText} setSortText={setSortText} page={page} setAllPages={setAllPages} setAllProducts={setAllProducts}/>
       <select onChange={ (e) => { setSortText(e.target.value); setSort(true); sortBy(e.target.value, 1) } }>
