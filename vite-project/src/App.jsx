@@ -1,3 +1,5 @@
+import { CronJob } from 'cron';
+import moment from 'moment';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import './app.css';
@@ -12,7 +14,7 @@ function App(){
   const [sort, setSort] = useState(false);
   const [search, setSearch] = useState(false);
   const [sortText, setSortText] = useState('');
-
+  const [lastUpdated, setLastUpdated ] = useState('');
   let ignore = false;
 
   const retrieveProducts = async (pageNum) => {
@@ -45,7 +47,7 @@ function App(){
         if (response.status === 200) {
           console.log(data);
           setAllProducts(data[0]);
-          setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1) ;
+          setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1);
         }
       } catch (err) {
         console.log(err);
@@ -68,13 +70,41 @@ function App(){
     }
   }
 
+  async function getUpdate() {
+    try {
+      const response = await fetch (`http://localhost:3000/?update=true`);
+      if (!response.ok) {
+        throw await response.json();
+      }
+      const data = await response.json();
+      if (response.status === 200) {
+        let local = moment(data[0].updated_date).format('YYYY-MM-DD HH:mm A');
+        setLastUpdated(local);
+        console.log(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   useEffect(() => {
     if (!ignore) {
       retrieveProducts(1);
+      getUpdate();
     }
     return () => {
       ignore = true;
     }
+  }, []);
+
+  useEffect(() => {
+      new CronJob('45 11 * * *', function () {
+          retrieveProducts(page);
+          getUpdate();
+        },
+          null, true, 'America/New_York'
+      );
+      console.log('updated');
   }, []);
 
   return (
@@ -101,6 +131,7 @@ function App(){
             return arr;
         })()}
       </div>
+      <footer>Prices last updated at: {lastUpdated}</footer>
    </div>
   )
 }

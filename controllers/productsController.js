@@ -107,12 +107,12 @@ exports.product_create = ( async (req, res, next) => {
 exports.product_put =  ( async (req, res, next) => {
     let sql = `SELECT id, price, lowest_price, url FROM myproducts`;
     const listOfProducts = await queryDatabase(sql);
-    const userAgent = 'Mozilla/5.0 (X11; Linux x86_64)' + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36';
 
     for (let x = 0; x < listOfProducts.length; x++) {
         try {
-            const browser = await puppeteer.launch( {headless: 'new'});
+            const browser = await puppeteer.launch({headless: 'new'});
             const page = await browser.newPage();
+            const userAgent = 'Mozilla/5.0 (X11; Linux x86_64)' + 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.39 Safari/537.36';
             await page.setUserAgent(userAgent);
             await page.goto(listOfProducts[x].url, {waitUntil: "domcontentloaded"});
             await page.waitForSelector('img');
@@ -124,23 +124,20 @@ exports.product_put =  ( async (req, res, next) => {
             console.log(item);
     
             if (item.price[0] < listOfProducts[x].lowest_price) {
-                let updateSql = `UPDATE myproducts
-                SET price = ${item.price[0]},
-                lowest_price = ${item.price[0]}, 
-                lowest_price_date = CURRENT_DATE
-                WHERE url = "${listOfProducts[x].url}"`;                   
+                let updateSql = `UPDATE myproducts SET price = ${item.price[0]}, lowest_price = ${item.price[0]}, lowest_price_date = CURRENT_DATE WHERE url = "${listOfProducts[x].url}"`;                   
                 const query = await queryDatabase(updateSql);
             } else {
-                let sql = `UPDATE myproducts
-                SET price = ${item.price[0]}
-                WHERE url = "${listOfProducts[x].url}"`;
+                let sql = `UPDATE myproducts SET price = ${item.price[0]} WHERE url = "${listOfProducts[x].url}"`;
                 const query = await queryDatabase(sql);
             }
-            await browser.close()
+            await browser.close();
         } catch (err) {
             console.log(err);
         }
     }
+    let sqlUpdate = `UPDATE updates SET updated_date = CURRENT_TIMESTAMP where id = 1`;
+    await queryDatabase(sqlUpdate);
+    return res.status(200);
 });
 
 exports.product_delete = ( async (req, res, next) => {
