@@ -47,9 +47,9 @@ const Input = ({retrieveProducts, page}) => {
 
     return (
         <>
-        <form className="p-4 flex flex-row gap-4 w-2/5 justify-center" onSubmit={(e) => checkUrl(e)}>
+        <form className="p-4 xs:p-2 s:p-2  flex flex-row gap-4 w-2/5 justify-center" onSubmit={(e) => checkUrl(e)}>
             <input className="rounded-xl p-2 min-w-full" type='search' placeholder="Add the direct link to your product here"
-            value={link} onChange={(e) => setLink(e.target.value)} required>
+            value={link} onChange={(e) => setLink(e.target.value)}>
             </input>
             <SubmitButton name={"Add"}/>
         </form>

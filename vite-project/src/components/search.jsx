@@ -22,7 +22,7 @@ function Search ({page, setAllPages, setAllProducts, setSearch, sortText, setSor
     }
 
     return (
-        <form className="p-4 flex flex-row gap-4 w-2/5 justify-center" onSubmit={(e) => getSearch(e)}>
+        <form className="p-4 xs:p-2 s:p-2 flex flex-row gap-4 w-2/5 justify-center" onSubmit={(e) => getSearch(e)}>
             <input className="rounded-xl p-2 min-w-full"
             type="search" placeholder="Search product by name" onChange={(e) => setSortText(e.target.value)}>
             </input>
