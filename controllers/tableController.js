@@ -2,7 +2,7 @@ const queryDatabase = require('../querydb');
 
 exports.table_create_post = (async (req, res, next) => {
     try {
-        let sql = `CREATE TABLE myproducts(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(150), price INT DEFAULT NULL, lowest_price INT DEFAULT NULL, lowest_price_date timestamp DEFAULT (current_timestamp), url TEXT, image_url VARCHAR(500) DEFAULT "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png");`;
+        let sql = `CREATE TABLE myproducts(id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(150), price INT DEFAULT NULL, lowest_price INT DEFAULT NULL, price_yesterday INT DEFAULT, lowest_price_date timestamp DEFAULT (current_timestamp), url TEXT, image_url VARCHAR(500) DEFAULT "https://upload.wikimedia.org/wikipedia/commons/b/b1/Missing-image-232x150.png");`;
         let updateSql = `CREATE TABLE updates(id INT PRIMARY KEY, last_updated timestamp DEFAULT NULL)`;
         const query = await Promise.all([queryDatabase(sql), queryDatabase(updateSql)]);
         return res.status(200).json('Tables created!');

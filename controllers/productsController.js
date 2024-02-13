@@ -107,7 +107,9 @@ exports.product_create = ( async (req, res, next) => {
 exports.product_put =  ( async (req, res, next) => {
     let sql = `SELECT id, price, lowest_price, url FROM myproducts`;
     const listOfProducts = await queryDatabase(sql);
-
+    let priceYesterday = `UPDATE myproducts SET myproducts.price_yesterday = myproducts.price;`
+    await queryDatabase(priceYesterday);
+    
     for (let x = 0; x < listOfProducts.length; x++) {
         try {
             const browser = await puppeteer.launch({headless: 'new'});

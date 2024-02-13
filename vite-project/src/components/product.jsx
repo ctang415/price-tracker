@@ -32,7 +32,7 @@ const Product = ({product, setAllProducts, allProducts, retrieveProducts, page})
             </Link>
             <h3 className='text-center font-bold'>{product.name}</h3>
             <p>Today's Price: <strong>{product.price ? "$" + product.price : "N/A"}</strong></p>
-            <p>Yesterday's Price: { product.price_yesterday ? "$" + product.price_yesterday : "N/A" } { !product.price_yesterday ? "" : (product.price - product.price_yesterday)/product.price * 100 + "%"}</p>
+            <p>Yesterday's Price: { product.price_yesterday ? "$" + product.price_yesterday : "N/A" } { !product.price_yesterday ? "" :  `(${Math.round( (product.price - product.price_yesterday)/product.price_yesterday * 100 )}%)`}</p>
             <p className='text-xs'>Lowest Price: ${product.lowest_price} on {product.lowest_price_date.slice(0, 10)}</p>
         </li>
     )

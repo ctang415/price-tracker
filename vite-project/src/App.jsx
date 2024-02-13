@@ -1,4 +1,3 @@
-import { CronJob } from 'cron';
 import moment from 'moment';
 import { useEffect } from 'react';
 import { useState } from 'react';
@@ -97,18 +96,8 @@ function App(){
     }
   }, []);
 
-  useEffect(() => {
-      new CronJob('45 10 * * *', function () {
-          retrieveProducts(page);
-          getUpdate();
-        },
-          null, true, 'America/New_York'
-      );
-      console.log('updated');
-  }, []);
-
   return (
-    <div className='h-full w-screen bg-slate-100 flex flex-col items-center align-center p-10 gap-2 xs:gap-0 s:gap-0'>
+    <div className='ease-in-out duration-500 delay-350 h-full w-screen bg-slate-100 flex flex-col items-center align-center p-10 gap-2 xs:gap-0 s:gap-0'>
       <h1 className='text-6xl text-center xs:text-4xl sm:text-center sm:text-4xl md:text-5xl font-serif text-extrabold text-center'>what's today's price?</h1>
       <Input retrieveProducts={retrieveProducts} page={page}/>
       <Search setSearch={setSearch} sortText={sortText} setSortText={setSortText} page={page} setAllPages={setAllPages} setAllProducts={setAllProducts}/>
