@@ -38,7 +38,6 @@ const Input = ({retrieveProducts, page}) => {
             if (response.status === 200) {
                 retrieveProducts(page);
                 setLink('');
-                console.log(data);
             }
         } catch (err) {
             setError(err.msg);

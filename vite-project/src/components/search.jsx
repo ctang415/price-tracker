@@ -11,7 +11,6 @@ function Search ({page, setAllPages, setAllProducts, setSearch, sortText, setSor
             }
             const data = await response.json();
             if (response.status === 200) {
-                console.log(data);
                 setAllProducts(data[0]);
                 setAllPages(Math.floor(data[1][0].COUNT/7) + 1);
                 setSearch(true);

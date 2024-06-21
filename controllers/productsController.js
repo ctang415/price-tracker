@@ -3,19 +3,21 @@ const queryDatabase = require('../querydb');
 
 exports.product_get =  ( async (req, res, next) => {
     if (req.query.url !== undefined) {
-        let sql = `SELECT * FROM myproducts WHERE url = "${req.query.url}"`;
-        const query = await queryDatabase(sql);
+        // checks the add input to see if a url for the product already exists in the database
+        let sql = `SELECT * FROM myproducts WHERE url LIKE concat("%", ?, "%")`;
+        const query = await queryDatabase(sql, (`${req.query.url}`));
+        console.log(query.length)
         if (query.length === 0) {
             return res.status(200).json({success: false});
         } else {
             return res.status(400).json({msg: "This product is already being tracked."});
         }
     } else {
+        // checks the search input to see if product exists in database
         let page = ((req.query.page - 1) * 6);
-        let sql = `SELECT * FROM myproducts WHERE name LIKE '%${req.query.search}%' ORDER BY id DESC LIMIT 6 OFFSET ${page}`;
-        let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts where name like '%${req.query.search}%'`;
-        const query = await Promise.all( [ queryDatabase(sql), queryDatabase(sqlCount)]);
-
+        let sql = `SELECT * FROM myproducts WHERE name LIKE concat("%", ?, "%") ORDER BY id DESC LIMIT 6 OFFSET ${page}`;
+        let sqlCount = `SELECT COUNT(*) AS COUNT FROM myproducts WHERE name LIKE concat('%', ?, '%')`;
+        const query = await Promise.all( [ queryDatabase(sql, (`${req.query.search}`)), queryDatabase(sqlCount, `${req.query.search}`)]);
         if (query.length !== 0) {
             return res.status(200).json(query);
         } else {
@@ -25,6 +27,7 @@ exports.product_get =  ( async (req, res, next) => {
 });
 
 exports.product_create = ( async (req, res, next) => {
+    // creates new database entry for product
     try {
         const browser = await puppeteer.launch({headless: true});
         const page = await browser.newPage();
@@ -52,8 +55,9 @@ exports.product_create = ( async (req, res, next) => {
 
         if (item.name[0] !== undefined) {
             if (item.price[0] == undefined && item.image[0] == undefined) {
-                let insertSql = `INSERT INTO myproducts (name, url) VALUES ("${item.name[0]}", "${req.body.link}")`;
-                const query = await queryDatabase(insertSql);
+                //let insertSql = `INSERT INTO myproducts (name, url) VALUES ("${item.name[0]}", "${req.body.link}")`;
+                let insertSql = `INSERT INTO myproducts (name, url) VALUES ("${item.name[0]}", ?)`;
+                const query = await queryDatabase(insertSql, (`${req.body.link}`));
                 if (query.affectedRows !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
                     return await browser.close();
@@ -62,9 +66,8 @@ exports.product_create = ( async (req, res, next) => {
                     return await browser.close();
                 }
             } else if (item.price[0] == undefined) {
-                let insertSql = `INSERT INTO myproducts (name, url, image_url) VALUES ("${item.name[0]}", "${req.body.link}", "${item.url[0]}")`;
-                const query = await queryDatabase(insertSql);
-
+                let insertSql = `INSERT INTO myproducts (name, url, image_url) VALUES ("${item.name[0]}", ?, "${item.url[0]}")`;
+                const query = await queryDatabase(insertSql, (`${req.body.link}`));
                 if (query.affectedRows !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
                     return await browser.close();
@@ -73,10 +76,9 @@ exports.product_create = ( async (req, res, next) => {
                     return await browser.close();
                 }
             } else if (item.image[0] == undefined) {
-                let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url) VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, "${req.body.link}")`;
-                const query = await queryDatabase(insertSql);
-
-                if (query.affectedRows !== 0) {
+                let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url) VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, ?)`;
+                const query = await queryDatabase(insertSql, (`${req.body.link}`));
+if (query.affectedRows !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
                     return await browser.close();
                 } else {
@@ -84,9 +86,8 @@ exports.product_create = ( async (req, res, next) => {
                     return await browser.close();
                 }
             } else {
-                let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url, image_url) VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, "${req.body.link}", "${item.image[0]}")`
-                const query = await queryDatabase(insertSql);
-
+                let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url, image_url) VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, ?, "${item.image[0]}")`
+                const query = await queryDatabase(insertSql, (`${req.body.link}`));
                 if (query.affectedRows !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
                     return await browser.close();
@@ -105,11 +106,11 @@ exports.product_create = ( async (req, res, next) => {
 });
 
 exports.product_put =  ( async (req, res, next) => {
+    // updates database entries with lowest and current prices
     let sql = `SELECT id, price, lowest_price, url FROM myproducts`;
     const listOfProducts = await queryDatabase(sql);
     let priceYesterday = `UPDATE myproducts SET myproducts.price_yesterday = myproducts.price;`
     await queryDatabase(priceYesterday);
-    
     for (let x = 0; x < listOfProducts.length; x++) {
         try {
             const browser = await puppeteer.launch({headless: 'new'});
@@ -118,13 +119,11 @@ exports.product_put =  ( async (req, res, next) => {
             await page.setUserAgent(userAgent);
             await page.goto(listOfProducts[x].url, {waitUntil: "domcontentloaded"});
             await page.waitForSelector('img');
-
             const item = await page.evaluate(() => {
                 const price = [...document.querySelectorAll('span[data-testid*="price"], span[class*="price"]:not(footer), span[class*="Price"]:not(footer), div[class*="Price"]:not(footer), div[class*="price"]:not(footer)')].map(el => el.innerText.includes('$') ? parseInt(el.innerText.replace('$', '')) : parseInt(el.innerText)).filter(el => el).filter( (el, index, arr) => arr.indexOf(el) === index).slice(0,2).sort((a, b) => {return a - b });
                 return { price }
             });
             console.log(item);
-    
             if (item.price[0] < listOfProducts[x].lowest_price) {
                 let updateSql = `UPDATE myproducts SET price = ${item.price[0]}, lowest_price = ${item.price[0]}, lowest_price_date = CURRENT_DATE WHERE url = "${listOfProducts[x].url}"`;                   
                 const query = await queryDatabase(updateSql);
@@ -143,9 +142,9 @@ exports.product_put =  ( async (req, res, next) => {
 });
 
 exports.product_delete = ( async (req, res, next) => {
-    let sql = `DELETE FROM myproducts where id = ${req.params.productid}`;
-    const query = await queryDatabase(sql);
- 
+    // deletes products from database
+    let sql = `DELETE FROM myproducts WHERE id = ?`;
+    const query = await queryDatabase(sql, (`${req.params.productid}`));
     if (query.affectedRows !== 0) {
         return res.status(200).json({msg: 'Product successfully removed!'});
     } else {

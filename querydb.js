@@ -1,8 +1,8 @@
 const db = require('./connection');
 
-function queryDatabase(sql) {
-  return new Promise((resolve, reject) => {
-    db.query(sql, (err, result) => {
+function queryDatabase(sql, x) {
+    return new Promise((resolve, reject) => {
+    db.query(sql, x, (err, result) => {
       if (err) return reject(err);
       return resolve(result);
     });
