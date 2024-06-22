@@ -2,11 +2,12 @@ import moment from 'moment';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import './app.css';
+import Footer from './components/footer';
 import Input from './components/input';
 import Products from './components/products';
 import Search from './components/search';
 
-function App(){
+function App() {
   const [allProducts, setAllProducts] = useState([]);
   const [allPages, setAllPages] = useState(0);
   const [page, setPage] = useState(1);
@@ -94,7 +95,7 @@ function App(){
 
 
   return (
-    <div className='ease-in-out duration-500 delay-350 h-screen w-screen bg-slate-100 flex flex-col items-center align-center p-10 gap-2 xs:gap-0 s:gap-0'>
+    <div className='ease-in-out positive:relative duration-500 delay-350 min-h-screen w-screen bg-slate-100 flex flex-col items-center align-center p-10 gap-2 xs:gap-0 s:gap-0'>
       <h1 className='text-6xl text-center xs:text-4xl sm:text-center sm:text-4xl md:text-5xl font-serif text-extrabold text-center'>what's today's price?</h1>
       <Input retrieveProducts={retrieveProducts} page={page}/>
       <Search setSearch={setSearch} sortText={sortText} setSortText={setSortText} searchText={searchText} setSearchText={setSearchText} page={page} setAllPages={setAllPages} setAllProducts={setAllProducts}/>
@@ -104,20 +105,8 @@ function App(){
         <option value='price DESC'>Price: High to Low</option>
         <option value='id DESC'>Newest</option>
       </select>
-      <Products page={page} retrieveProducts={retrieveProducts} allProducts={allProducts} setAllProducts={setAllProducts}/>
-      <div className='flex flex-row gap-2'>{(() => {
-            const arr = [];
-            for (let i = 1; i < allPages+1; i++) {
-                arr.push(
-                    <ul key={i}>
-                        <li onClick={sort || search ? () => sortBy(sortText, i) : () => { retrieveProducts(i); setPage(i) }} className='text-xxs cursor-pointer'>{i}</li>
-                    </ul>
-                );
-            }
-            return arr;
-        })()}
-      </div>
-      <footer className='text-center'>Prices last updated at: {lastUpdated}</footer>
+        <Products page={page} retrieveProducts={retrieveProducts} allProducts={allProducts} setAllProducts={setAllProducts}/>
+        <Footer lastUpdated={lastUpdated} allPages={allPages} sortText={sortText} sort={sort} sortBy={sortBy} search={search} retrieveProducts={retrieveProducts} setPage={setPage} page={page}/>
    </div>
   )
 }
