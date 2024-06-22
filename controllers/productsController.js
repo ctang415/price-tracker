@@ -6,7 +6,6 @@ exports.product_get =  ( async (req, res, next) => {
         // checks the add input to see if a url for the product already exists in the database
         let sql = `SELECT * FROM myproducts WHERE url LIKE concat("%", ?, "%")`;
         const query = await queryDatabase(sql, (`${req.query.url}`));
-        console.log(query.length)
         if (query.length === 0) {
             return res.status(200).json({success: false});
         } else {

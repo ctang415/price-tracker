@@ -12,7 +12,8 @@ function App(){
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState(false);
   const [search, setSearch] = useState(false);
-  const [sortText, setSortText] = useState('');
+  const [sortText, setSortText] = useState('id DESC');
+  const [searchText, setSearchText] = useState('');
   const [lastUpdated, setLastUpdated ] = useState('');
   let ignore = false;
 
@@ -34,10 +35,10 @@ function App(){
     }
   }
 
-  const sortBy = async (sort, page) => {
+  const sortBy = async (tar, page) => {
     if (!search) {
       try {
-        const response = await fetch (`http://localhost:3000/?sort=${sort}&page=${page}`);
+        const response = await fetch (`http://localhost:3000/?sort=${tar}&page=${page}`);
         if (!response.ok) {
           throw await response.json();
         }
@@ -51,14 +52,13 @@ function App(){
       }
     } else {
       try {
-        const response = await fetch (`http://localhost:3000/?search=${sortText}&sort=${sort}&page=${page}`)
+        const response = await fetch (`http://localhost:3000/?search=${searchText}&sort=${tar}&page=${page}`)
         if (!response.ok) {
           throw await response.json();
         }
         const data = await response.json();
         if (response.status === 200) {
           setAllProducts(data[0]);
-          setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1);
         }
       } catch (err) {
         console.log(err);
@@ -92,12 +92,13 @@ function App(){
     }
   }, []);
 
+
   return (
     <div className='ease-in-out duration-500 delay-350 h-screen w-screen bg-slate-100 flex flex-col items-center align-center p-10 gap-2 xs:gap-0 s:gap-0'>
       <h1 className='text-6xl text-center xs:text-4xl sm:text-center sm:text-4xl md:text-5xl font-serif text-extrabold text-center'>what's today's price?</h1>
       <Input retrieveProducts={retrieveProducts} page={page}/>
-      <Search setSearch={setSearch} sortText={sortText} setSortText={setSortText} page={page} setAllPages={setAllPages} setAllProducts={setAllProducts}/>
-      <select onChange={ (e) => { setSort(e.target.value); setSort(true); sortBy(e.target.value, 1) } }>
+      <Search setSearch={setSearch} sortText={sortText} setSortText={setSortText} searchText={searchText} setSearchText={setSearchText} page={page} setAllPages={setAllPages} setAllProducts={setAllProducts}/>
+      <select onChange={ (e) => { setSortText( prev => {return e.target.value}); setSort(true); sortBy(e.target.value, 1) } }>
         <option value=''>Please choose an option</option>
         <option value='price ASC'>Price: Low to High</option>
         <option value='price DESC'>Price: High to Low</option>

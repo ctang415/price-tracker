@@ -1,3 +1,4 @@
+const { ConsoleMessage } = require('puppeteer');
 const queryDatabase = require('../querydb');
 
 exports.table_create_post = (async (req, res, next) => {
