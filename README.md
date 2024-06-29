@@ -1,6 +1,6 @@
 # price-tracker
 ## What's Today's Price?
-What's Today's Price is aa simple price-tracking web application created with JavaScript, React, NodeJS, Puppeteer, and mySQL. You add the link of the product you want to keep track of and Puppeteer will scrape the initial product data for you and then store it into a mySQL database. A cron job will then run daily to scrape each of the items you've added to your tracking list and update the prices according to its currently listed price on the website.
+What's Today's Price is a simple price-tracking web application created with JavaScript, React, NodeJS, Puppeteer, and mySQL. You add the link of the product you want to keep track of and Puppeteer will scrape the initial product data for you and then store it into a mySQL database. A cron job will then run daily to scrape each of the items you've added to your tracking list and update the prices according to its currently listed price on the website.
 
 <p align="center">
     <img src="vite-project/src/assets/Demo.gif" alt="Demo of application" width="500"/>
