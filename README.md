@@ -11,8 +11,12 @@ What's Today's Price is a simple price-tracking web application created with Jav
 - Have a cron job to run a scraping function which will check the websites for price changes and update the database. Scraping is currently set to once a day, but can be adjusted to occur more frequently. **Please be mindful of how often you scrape!**
 - Search for specific products or remove them if you no longer want to track them.
 - Filter items by lowest price, highest price, or newest.
+- **NEW** (07/12/24) Get email notifications if a price drops for any item.
 
-**How to run locally on your computer**: Use `node app.js` in the default folder to run the server for the API and use `npm run dev` in the src folder to run the web application.
+**How to run locally on your computer**: 
+1. Make sure to install MySQL and set up your local MySQL server.
+2. Use `node app.js` in the default folder to run the server for the API and use `npm run dev` in the src folder to run the web application.
+3. To get email notifications sent to your inbox, make sure to change the host, user, and pass for the transporter.
 
 ## What the application looks like:
 ![Screenshot of application](https://imgur.com/H1YmVof.jpg)

@@ -11,8 +11,8 @@ function Search ({page, setAllPages, setAllProducts, setSearch, sortText, setSor
             }
             const data = await response.json();
             if (response.status === 200) {
-                setAllProducts(data[0]);
-                setAllPages(Math.floor(data[1][0].COUNT/7) + 1);
+                setAllProducts(data.query[0]);
+                setAllPages(Math.floor(data.query[1][0].COUNT/7) + 1);
                 setSearch(true);
             }
         } catch (err) {

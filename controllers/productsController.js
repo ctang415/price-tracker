@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const queryDatabase = require('../querydb');
+const sendEmail = require('../mail');
 
 exports.product_get =  ( async (req, res, next) => {
     if (req.query.url !== undefined) {
@@ -77,7 +78,7 @@ exports.product_create = ( async (req, res, next) => {
             } else if (item.image[0] == undefined) {
                 let insertSql = `INSERT INTO myproducts (name, price, lowest_price, url) VALUES ("${item.name[0]}", ${item.price[0]}, ${item.price[0]}, ?)`;
                 const query = await queryDatabase(insertSql, (`${req.body.link}`));
-if (query.affectedRows !== 0) {
+                if (query.affectedRows !== 0) {
                     res.status(200).json({msg: 'Product successfully added!'});
                     return await browser.close();
                 } else {
@@ -104,11 +105,13 @@ if (query.affectedRows !== 0) {
     }
 });
 
-exports.product_put =  ( async (req, res, next) => {
+exports.product_put = ( async (req, res, next) => {
     // updates database entries with lowest and current prices
+    let updatedItems = [];
     let sql = `SELECT id, price, lowest_price, url FROM myproducts`;
     const listOfProducts = await queryDatabase(sql);
-    let priceYesterday = `UPDATE myproducts SET myproducts.price_yesterday = myproducts.price;`
+    let priceYesterday = `UPDATE myproducts SET myproducts.price_yesterday = myproducts.price;`;
+    let emailData = `SELECT email FROM updates;`;
     await queryDatabase(priceYesterday);
     for (let x = 0; x < listOfProducts.length; x++) {
         try {
@@ -126,7 +129,8 @@ exports.product_put =  ( async (req, res, next) => {
             if (item.price[0] < listOfProducts[x].lowest_price) {
                 let updateSql = `UPDATE myproducts SET price = ${item.price[0]}, lowest_price = ${item.price[0]}, lowest_price_date = CURRENT_DATE WHERE url = "${listOfProducts[x].url}"`;                   
                 const query = await queryDatabase(updateSql);
-            } else {
+                updatedItems.push({"name":`${listOfProducts[x].name}`, "price": `${listOfProducts[x].price}`, "changed_price": `${item.price[0]}`, "image": `${listOfProducts[x].image}`, "url": `${listOfProducts[x].url}`})
+            } else if (item.price[0]) {
                 let sql = `UPDATE myproducts SET price = ${item.price[0]} WHERE url = "${listOfProducts[x].url}"`;
                 const query = await queryDatabase(sql);
             }
@@ -136,9 +140,14 @@ exports.product_put =  ( async (req, res, next) => {
         }
     }
     let sqlUpdate = `UPDATE updates SET updated_date = CURRENT_TIMESTAMP where id = 1`;
-    await queryDatabase(sqlUpdate);
+    const query = await Promise.all([queryDatabase(sqlUpdate), queryDatabase(emailData)])
+    if (query[1][0].email && updatedItems.length !== 0) {
+        await sendEmail(query[1][0].email, updatedItems);
+    }
     return res.status(200);
 });
+
+
 
 exports.product_delete = ( async (req, res, next) => {
     // deletes products from database

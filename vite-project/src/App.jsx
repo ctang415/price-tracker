@@ -16,6 +16,8 @@ function App() {
   const [sortText, setSortText] = useState('id DESC');
   const [searchText, setSearchText] = useState('');
   const [lastUpdated, setLastUpdated ] = useState('');
+  const [email, setEmail] = useState("");
+  const [isEmail, setIsEmail] = useState(false);
   let ignore = false;
 
   const retrieveProducts = async (pageNum) => {
@@ -28,8 +30,13 @@ function App() {
       }
       const data = await response.json();
       if (response.status === 200) {
-        setAllProducts(data[0]);
-        setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1);
+        setAllProducts(data.query[0]);
+        setAllPages(Math.floor(data.query[1][0].COUNT/6.5) + 1);
+        console.log(data.emailData[0].email)
+        if (data.emailData[0].email !== null && data.emailData[0].email.length !== 0) {
+          setIsEmail(true);
+          setEmail(data.emailData[0].email);
+        }
       }
     } catch (err) {
       console.log(err);
@@ -45,8 +52,8 @@ function App() {
         }
         const data = await response.json();
         if (response.status === 200) {
-          setAllProducts(data[0]);
-          setAllPages(Math.floor(data[1][0].COUNT/6.5) + 1);
+          setAllProducts(data.query[0]);
+          setAllPages(Math.floor(data.query[1][0].query.COUNT/6.5) + 1);
         }
       } catch (err) {
         console.log(err);
@@ -59,7 +66,7 @@ function App() {
         }
         const data = await response.json();
         if (response.status === 200) {
-          setAllProducts(data[0]);
+          setAllProducts(data.query[0]);
         }
       } catch (err) {
         console.log(err);
@@ -75,7 +82,7 @@ function App() {
       }
       const data = await response.json();
       if (response.status === 200) {
-        let local = moment(data[0].updated_date).format('YYYY-MM-DD HH:mm A');
+        let local = moment(data.query[0].updated_date).format('YYYY-MM-DD HH:mm A');
         setLastUpdated(local);
       }
     } catch (err) {
@@ -83,8 +90,22 @@ function App() {
     }
   }
 
+  async function createTable() {
+    try {
+      const response = await fetch (`http://localhost:3000/`, {
+        method: 'POST', headers: {'Content-type': 'application/json'}, 
+        credentials: 'include'});
+        if (!response.ok) {
+          throw await response.json();
+        }
+    } catch (err) {
+      console.log(err.sqlMessage);
+    }
+  }
+
   useEffect(() => {
     if (!ignore) {
+      createTable();
       retrieveProducts(1);
       getUpdate();
     }
@@ -93,9 +114,8 @@ function App() {
     }
   }, []);
 
-
   return (
-    <div className='ease-in-out positive:relative duration-500 delay-350 min-h-screen w-screen bg-slate-100 flex flex-col items-center align-center p-10 gap-2 xs:gap-0 s:gap-0'>
+    <div className='ease-in-out positive:relative duration-500 delay-350 min-h-screen w-screen bg-slate-100 flex flex-col items-center p-10 gap-2 xs:gap-0 s:gap-0'>
       <h1 className='text-6xl text-center xs:text-4xl sm:text-center sm:text-4xl md:text-5xl font-serif text-extrabold text-center'>what's today's price?</h1>
       <Input retrieveProducts={retrieveProducts} page={page}/>
       <Search setSearch={setSearch} sortText={sortText} setSortText={setSortText} searchText={searchText} setSearchText={setSearchText} page={page} setAllPages={setAllPages} setAllProducts={setAllProducts}/>
@@ -106,7 +126,8 @@ function App() {
         <option value='id DESC'>Newest</option>
       </select>
         <Products page={page} retrieveProducts={retrieveProducts} allProducts={allProducts} setAllProducts={setAllProducts}/>
-        <Footer lastUpdated={lastUpdated} allPages={allPages} sortText={sortText} sort={sort} sortBy={sortBy} search={search} retrieveProducts={retrieveProducts} setPage={setPage} page={page}/>
+        <Footer email={email} setEmail={setEmail} isEmail={isEmail} setIsEmail={setIsEmail}
+        lastUpdated={lastUpdated} allPages={allPages} sortText={sortText} sort={sort} sortBy={sortBy} search={search} retrieveProducts={retrieveProducts} setPage={setPage} page={page}/>
    </div>
   )
 }
